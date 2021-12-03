@@ -1,20 +1,15 @@
-BIN=day1_1 day1_2
+SRC != ls *[!input].asm
+OBJ = $(SRC:.asm=.o)
+BIN = $(OBJ:.o=)
 
-all: $(BIN)
+.SUFFIXES: .asm .o
 
-day1_1: day1_1.o
-	ld -o day1_1 day1_1.o
-	rm -f day1_1.o
+all: $(OBJ)
 
-day1_2: day1_2.o
-	ld -o day1_2 day1_2.o
-	rm -f day1_2.o
-
-day1_1.o: day1_1.asm
-	nasm -felf64 -o day1_1.o day1_1.asm
-
-day1_2.o: day1_2.asm
-	nasm -felf64 -o day1_2.o day1_2.asm
+.asm.o:
+	nasm -felf64 -o $@ $<
+	ld -o $(@:.o=) $@
+	rm -f $@
 
 clean:
-	rm -f $(BIN) *.o
+	rm -f $(BIN) $(OBJ)
