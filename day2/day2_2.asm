@@ -92,9 +92,6 @@ main:
 
         ret
 
-segment .data
-
-
 segment .rodata
 format_str: db "%d",10,0
 
