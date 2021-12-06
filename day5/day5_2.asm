@@ -1,6 +1,6 @@
 ;;;
 ;;; FreeBSD x86_64 asm, used with nasm
-;;; AOC 2021 Day5 part 1
+;;; AOC 2021 Day5 part 2
 ;;;
 %define FALSE 0         ; Booleans
 %define TRUE 1
@@ -41,7 +41,7 @@ main:
 
         .x_changed:     ; Else Xs are different
             cmp dx, r9w
-            jne read_loop       ; X and Y are different (diagonal), skip
+            jne .diagonal       ; X and Y are different (diagonal)
             jmp .horizontal     ; Else Xs different & Ys equal (horizontal)
 
         .check_y:
@@ -52,7 +52,7 @@ main:
         ;; If horizontal, loop over Xs
         .horizontal:
             ;; Reverse Xs if going backwards
-            cmp bx, r8w             ; Is 1st X larger than 2nd X?
+            cmp bx, r8w             ; 1st X > 2nd X?
             jle .horizontal_loop    ; No, go on
 
             .reverse_x:             ; Yes, going backwards, switch
@@ -68,7 +68,7 @@ main:
         ;; If vertical, loop over Ys
         .vertical:
             ;; Reverse Ys if going up
-            cmp dx, r9w             ; Is 1st Y larger than 2nd Y?
+            cmp dx, r9w             ; 1st Y > 2nd Y?
             jle .vertical_loop      ; No, go on
 
             .reverse_y:             ; Yes, going up, switch
@@ -80,6 +80,47 @@ main:
                 call increment_vent     ; No, increment vent line #
                 inc dx                  ; Next Y value
                 jmp .vertical_loop
+
+        ;; If diagonal, loop over Xs & Ys
+        .diagonal:
+            cmp dx, r9w             ; 1st Y > 2nd Y?
+            jle .check_diag_x       ; No, go on
+
+            .diag_reverse_y:        ; Yes, going up, switch points (Xs & Ys)
+                xchg bx, r8w        
+                xchg dx, r9w        
+
+            .check_diag_x:
+                ;; Is 1st X less than (to the left of) 2nd X?
+                ;;   or greater than (to the right of) 2nd X?
+                cmp bx, r8w         
+                jle .diagonal_xright_loop    ; X2 > X1, going right-down
+
+            .diagonal_xleft_loop:
+                ;; Going left-down, decrement X and increment Y
+                cmp bx, r8w
+                jl read_loop        ; X1 < X2, passed end of line
+                cmp dx, r9w
+                jg read_loop        ; Y1 > Y2, passed end of line
+
+                call increment_vent ; Increment vent line #
+
+                dec bx
+                inc dx
+            jmp .diagonal_xleft_loop
+
+            .diagonal_xright_loop:
+                ;; Going right-down, increment X and increment Y
+                cmp bx, r8w
+                jg read_loop        ; X1 > X2, passed end of line
+                cmp dx, r9w
+                jg read_loop        ; Y1 > Y2, passed end of line
+
+                call increment_vent ; Increment vent line #
+
+                inc bx
+                inc dx
+            jmp .diagonal_xright_loop
 
     done_reading:
         ;; Loop through all vents, count up how many spaces are 2 or more
