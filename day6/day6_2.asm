@@ -1,6 +1,6 @@
 ;;;
 ;;; FreeBSD x86_64 asm, used with nasm
-;;; AOC 2021 Day6 part 1
+;;; AOC 2021 Day6 part 2
 ;;;
 %define MAX_INDEX 9
 
@@ -11,7 +11,7 @@ global main
 segment .text
 main:
     lea rsi, [data]     ; Input 
-    mov r8, 80          ; Day counter   
+    mov r8, 256         ; Day counter   
     xor r9, r9          ; Fish counter
 
     cld                 ; String ops will increment RSI/RDI
