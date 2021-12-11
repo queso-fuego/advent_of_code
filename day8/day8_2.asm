@@ -430,7 +430,6 @@ output_word: times 8 db 0   ; 1 of the 4 output words
 
 segment .rodata
 format_str: db "%lld",10,0       
-format_str2: db "%s",10,0       
 
 %include "input.asm"
 ;%include "test_input.asm"
