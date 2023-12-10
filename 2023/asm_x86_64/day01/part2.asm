@@ -30,16 +30,18 @@ open r8, O_RDONLY
 mov [fd], eax
 
 ;; Get size of file for buffer
-lseek [fd], 0, SEEK_END
+mov r8d, [fd]
+lseek r8, 0, SEEK_END
 mov [file_len], rax
-lseek [fd], 0, SEEK_SET ; Rewind file for reading
+lseek r8, 0, SEEK_SET ; Rewind file for reading
 
 ;; Map file in memory
-mmap NULL, [file_len], PROT_READ, MAP_SHARED, [fd], 0
+mov r9, [file_len]
+mmap NULL, r9, PROT_READ, MAP_SHARED, r8, 0
 mov [file_addr], rax
 
 ;; Close file
-close [fd]
+close r8
 
 ;; Initialize work variables
 mov qword [sum], 0
@@ -109,7 +111,7 @@ next_char:
     ;  so can end there if none found. Ex:
     ; for (i = 0; i < 9; i++) {
     ;     for (j = 0; j < 3; j++) {
-    ;         if (!strncmp(num_window+j, number_strings[i], 5-j)) {
+    ;         if (!strncmp(num_window+j, number_strings[i], 6-j)) {
     ;             // Found match; Convert i from int to char, use as first/last digit.
     ;             goto done;
     ;         }
@@ -129,8 +131,8 @@ next_char:
             imul rdx, r11, 6    ; Each string is 6 bytes, offset into array
             add rdx, rdi        ; str2 = number_strings[i]
 
-            mov rcx, 5
-            sub rcx, r12        ; len = 5 - j
+            mov rcx, 6          ; Max length of strings incl. null byte
+            sub rcx, r12        ; len = 6 - j
             call strncmp
             test rax, rax       ; Found match? 1 = true, 0 = false
             jnz .found_match    ; Yes, get digit

@@ -60,8 +60,7 @@ swap_next_digit:
 jbe swap_next_digit         ; No, keep swapping
 
 ;; Print number string
-lea rbx, [num_buf]
-write_buf rbx, r8
+write_buf num_buf, r8
 
 ;; Restore clobbered registers
 pop r8
@@ -79,32 +78,23 @@ ret     ; Return to caller
 ;;   RCX = count 
 ;; Output: RAX = 0 if not matching/false, 1 if matching/true
 strncmp:
-push rbx    ; Save clobbered registers
-push rcx
-push rdx
-push r8
-push r9
-.cmp_loop:
-    mov r8b, [rbx]
-    cmp r8b, [rdx]  ; str1[i] == str2[i]?
-    jne .no_match   ; No, leave
-    inc rbx         ; str1++
-    inc rdx         ; str2++
-loop .cmp_loop
+push rcx        ; Save clobbered registers
+push rsi
+push rdi
 
-.match:
-xor rax, rax
-inc rax             ; 1 = true, match
-jmp .end
+mov rsi, rbx
+mov rdi, rdx
+mov rax, 1      ; Default result 1 = true
 
-.no_match:
+repe cmpsb      ; while (byte [RSI] == byte [RDI]) { dec RCX; inc RSI; inc RDI; }
+jecxz .end      ; RCX = 0, matched?
+
 xor rax, rax    ; 0 = false, no match
 
 .end:
-pop r9      ; Restore clobbered registers
-pop r8
-pop rdx     
+pop rdi     ; Restore clobbered registers
+pop rsi
 pop rcx
-pop rbx
+
 ret
 

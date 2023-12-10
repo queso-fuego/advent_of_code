@@ -30,16 +30,18 @@ open r8, O_RDONLY
 mov [fd], eax
 
 ;; Get size of file for buffer
-lseek [fd], 0, SEEK_END
+mov r8d, [fd]
+lseek r8, 0, SEEK_END
 mov [file_len], rax
-lseek [fd], 0, SEEK_SET ; Rewind file for reading
+lseek r8, 0, SEEK_SET ; Rewind file for reading
 
 ;; Map file in memory
-mmap NULL, [file_len], PROT_READ, MAP_SHARED, [fd], 0
+mov r9, [file_len]
+mmap NULL, r9, PROT_READ, MAP_SHARED, r8, 0
 mov [file_addr], rax
 
 ;; Close file
-close [fd]
+close r8
 
 ;; Clear work variables
 mov qword [sum], 0

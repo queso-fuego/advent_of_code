@@ -1,8 +1,9 @@
 TARGETS = part1 part2
+DEPENDS = ../linux.inc ../helper_lib.inc
 
 all: $(TARGETS) run
 
-%: %.asm
+%: %.asm $(DEPENDS)
 	fasm.x64 $< $@ 
 	@chmod 777 $@
 	@printf "\n"
